@@ -3,17 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="./assets/style.css" />
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css" />
     <title>METRONOMATIC</title>
 </head>
 <body>
     <header>
         <p>METRONOMATIC</p>
     </header>
-    <main>
-        <button>
-            
-        </button>
-    </main>
+    <!--    
+        <main>
+            <button>
+                <div class="col s12 m4">
+                    <div class="center icon-block">
+                        <h2 class="light-blue-text"></h2>
+                        <br>
+                        <a class="btn light-blue lighten-1" onclick="startStop()" id="song-one">Start/Stop</a>
+            </button>
+        </main>
+    -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+        }
+        #bpmDisplay {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        #slider {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Metronome</h1>
+        <div id="bpmDisplay">BPM: 120</div>
+        <input type="range" id="slider" min="40" max="208" value="120">
+        <button id="toggleButton">Start</button>
+    </div>
+    
+    <script src="./assets/js/script.js"></script>
+    
 </body>
 </html>
