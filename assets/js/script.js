@@ -1,11 +1,3 @@
-/* var toneOne = new Audio("assets/songs/metronome tone 1.mp3");
-
-function startStop () {
-    if (toneOne.paused) {
-      toneOne.play();
-    }
-}; */
-
 let bpm = 120;  // Default BPM
 let isPlaying = false;
 let intervalId = null;
