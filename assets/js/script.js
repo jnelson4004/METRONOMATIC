@@ -16,18 +16,14 @@ function initAudioContext() {
     if (!audioContext) {
         // Create AudioContext only on first user interaction (click or touch)
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
+
         // Force the AudioContext to resume if it's suspended (mobile Safari issue)
-        try {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log("AudioContext resumed.");
-                }).catch(error => {
-                    console.error("Error resuming AudioContext: ", error);
-                });
-            }
-        } catch (error) {
-            console.error("Error initializing AudioContext: ", error);
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                console.log("AudioContext resumed successfully.");
+            }).catch(error => {
+                console.error("Error resuming AudioContext:", error);
+            });
         }
 
         // Load the sound buffer only once
@@ -44,7 +40,7 @@ function initAudioContext() {
 
 // Function to play a tick sound (now works with Web Audio API)
 function playTick() {
-    if (!tickAudio) return; // If the audio isn't loaded yet, do nothing
+    if (!tickAudio || !audioContext) return; // If the audio isn't loaded or context isn't initialized, do nothing
     const source = audioContext.createBufferSource();
     source.buffer = tickAudio;
     source.connect(audioContext.destination);
@@ -92,6 +88,7 @@ slider.addEventListener('input', () => {
 
 // Handle first touch or click to resume AudioContext (necessary for mobile Safari)
 toggleButton.addEventListener('click', () => {
+    console.log("Button clicked. Initializing AudioContext.");
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
 
     // If not already playing, start the metronome
@@ -112,9 +109,11 @@ slider.addEventListener('input', () => {
 
 // Ensure that AudioContext is resumed even after page load for Safari (by listening to touch/click)
 document.body.addEventListener('touchstart', () => {
+    console.log("First touch detected, initializing AudioContext.");
     initAudioContext();
 }, { once: true });
 
 document.body.addEventListener('click', () => {
+    console.log("First click detected, initializing AudioContext.");
     initAudioContext();
 }, { once: true });
