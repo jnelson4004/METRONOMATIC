@@ -11,7 +11,7 @@ const bpmDisplay = document.getElementById('bpmDisplay');
 const slider = document.getElementById('slider');
 const toggleButton = document.getElementById('toggleButton');
 
-// Function to ensure AudioContext is created or resumed after user interaction
+// Ensure AudioContext is created or resumed after user interaction
 function initAudioContext() {
     if (!audioContext) {
         // Create AudioContext only on first user interaction (click or touch)
@@ -85,8 +85,12 @@ slider.addEventListener('input', () => {
 });
 
 // Add event listener to start the metronome (using both click and touch events)
-toggleButton.addEventListener('click', () => {
+toggleButton.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default click behavior (sometimes causes issues on mobile)
+    
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
+
+    // Ensure that the button toggles correctly
     if (isPlaying) {
         stopMetronome();
     } else {
@@ -94,8 +98,12 @@ toggleButton.addEventListener('click', () => {
     }
 });
 
-toggleButton.addEventListener('touchstart', () => {
+toggleButton.addEventListener('touchstart', (event) => {
+    event.preventDefault(); // Prevent the default touch behavior on mobile
+    
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
+
+    // Ensure that the button toggles correctly
     if (isPlaying) {
         stopMetronome();
     } else {
