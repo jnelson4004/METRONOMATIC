@@ -85,12 +85,9 @@ slider.addEventListener('input', () => {
 });
 
 // Add event listener to start the metronome (using both click and touch events)
-toggleButton.addEventListener('click', (event) => {
-    event.preventDefault(); // Prevent default click behavior (sometimes causes issues on mobile)
-    
+toggleButton.addEventListener('click', () => {
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
-
-    // Ensure that the button toggles correctly
+    
     if (isPlaying) {
         stopMetronome();
     } else {
@@ -98,15 +95,21 @@ toggleButton.addEventListener('click', (event) => {
     }
 });
 
-toggleButton.addEventListener('touchstart', (event) => {
-    event.preventDefault(); // Prevent the default touch behavior on mobile
-    
+toggleButton.addEventListener('touchstart', () => {
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
-
-    // Ensure that the button toggles correctly
+    
     if (isPlaying) {
         stopMetronome();
     } else {
         startMetronome();
     }
+});
+
+// Make sure the metronome works smoothly on mobile by handling slider interactions
+slider.addEventListener('input', () => {
+    // Only update the BPM without restarting the metronome
+    bpm = slider.value;
+    bpmDisplay.textContent = `BPM: ${bpm}`;
+    interval = 60000 / bpm;  // Update the interval immediately based on the new BPM
+    lastTickTime = performance.now();  // Reset lastTickTime so it adjusts smoothly without delay
 });
