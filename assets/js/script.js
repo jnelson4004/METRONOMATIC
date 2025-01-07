@@ -1,6 +1,10 @@
 let bpm = 120;  // Default BPM
 let isPlaying = false;
-let intervalId = null;
+let lastTickTime = 0;
+let tickRequestId = null;  // Store the requestAnimationFrame ID
+let interval = 60000 / bpm; // Initial interval
+
+const tickAudio = new Audio('assets/songs/metronome tone 1.mp3'); // Preload the audio
 
 // DOM Elements
 const bpmDisplay = document.getElementById('bpmDisplay');
@@ -11,32 +15,42 @@ const toggleButton = document.getElementById('toggleButton');
 slider.addEventListener('input', () => {
     bpm = slider.value;
     bpmDisplay.textContent = `BPM: ${bpm}`;
-    if (isPlaying) {
-        // If metronome is playing, restart it with the new BPM
-        clearInterval(intervalId);
-        startMetronome();
-    }
+    interval = 60000 / bpm;  // Update interval based on the new BPM
+    lastTickTime = performance.now();  // Reset lastTickTime so it adjusts without delay
 });
 
-// Function to play a tick sound (you can replace with an actual audio file if preferred)
+// Function to play a tick sound
 function playTick() {
-    const audio = new Audio('assets/songs/metronome tone 1.mp3'); // Or use a Web Audio API for custom sounds
-    audio.play();
+    tickAudio.currentTime = 0;  // Reset to the beginning of the sound
+    tickAudio.play();
 }
 
 // Function to start the metronome
 function startMetronome() {
-    const interval = 60000 / bpm;  // Interval in milliseconds (60,000 ms = 1 minute)
-    intervalId = setInterval(playTick, interval);
+    function tick() {
+        const currentTime = performance.now();
+        if (currentTime - lastTickTime >= interval) {
+            playTick();
+            lastTickTime = currentTime;
+        }
+        if (isPlaying) {
+            tickRequestId = requestAnimationFrame(tick);  // Continue the loop
+        }
+    }
+    lastTickTime = performance.now(); // Reset the start time
+    tickRequestId = requestAnimationFrame(tick);  // Start the animation frame loop
     toggleButton.textContent = 'Stop';
     isPlaying = true;
 }
 
 // Function to stop the metronome
 function stopMetronome() {
-    clearInterval(intervalId);
-    toggleButton.textContent = 'Start';
     isPlaying = false;
+    if (tickRequestId !== null) {
+        cancelAnimationFrame(tickRequestId);  // Stop the animation frame loop
+        tickRequestId = null;  // Reset the request ID
+    }
+    toggleButton.textContent = 'Start';
 }
 
 // Toggle metronome play/pause on button click
