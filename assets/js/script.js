@@ -16,14 +16,20 @@ function initAudioContext() {
     if (!audioContext) {
         // Create AudioContext only on first user interaction (click or touch)
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        // Try to resume immediately upon interaction
-        audioContext.resume().then(() => {
-            console.log("AudioContext resumed.");
-        }).catch(error => {
-            console.error("Error resuming AudioContext: ", error);
-        });
         
+        // Resume the AudioContext if it is suspended (required for mobile Safari)
+        try {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log("AudioContext resumed.");
+                }).catch(error => {
+                    console.error("Error resuming AudioContext: ", error);
+                });
+            }
+        } catch (error) {
+            console.error("Error initializing AudioContext: ", error);
+        }
+
         // Load the sound buffer only once
         fetch('assets/songs/metronome tone 1.mp3')
             .then(response => response.arrayBuffer())
@@ -84,19 +90,8 @@ slider.addEventListener('input', () => {
     interval = 60000 / bpm;  // Update interval based on the new BPM
 });
 
-// Add event listener to start the metronome (using both click and touch events)
+// **Use the click event only for both desktop and mobile**
 toggleButton.addEventListener('click', () => {
-    initAudioContext();  // Ensure the AudioContext is initialized or resumed
-
-    if (isPlaying) {
-        stopMetronome();
-    } else {
-        startMetronome();
-    }
-});
-
-// Mobile (touch) event listener
-toggleButton.addEventListener('touchstart', () => {
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
 
     if (isPlaying) {
