@@ -16,6 +16,13 @@ function initAudioContext() {
     if (!audioContext) {
         // Create AudioContext only on first user interaction (click or touch)
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Try to resume immediately upon interaction
+        audioContext.resume().then(() => {
+            console.log("AudioContext resumed.");
+        }).catch(error => {
+            console.error("Error resuming AudioContext: ", error);
+        });
         
         // Load the sound buffer only once
         fetch('assets/songs/metronome tone 1.mp3')
@@ -26,13 +33,6 @@ function initAudioContext() {
                 console.log("Audio loaded successfully.");
             })
             .catch(error => console.error('Error loading audio file:', error));
-    }
-
-    // Resume the AudioContext if it's suspended (needed on mobile)
-    if (audioContext.state === 'suspended') {
-        audioContext.resume().then(() => {
-            console.log('AudioContext resumed');
-        });
     }
 }
 
@@ -48,14 +48,14 @@ function playTick() {
 // Function to start the metronome
 function startMetronome() {
     let nextTickTime = performance.now();
-    
+
     function tick() {
         const currentTime = performance.now();
         if (currentTime >= nextTickTime) {
             playTick();
             nextTickTime += interval; // Schedule the next tick
         }
-        
+
         if (isPlaying) {
             tickRequestId = requestAnimationFrame(tick);  // Continue the loop
         }
@@ -87,7 +87,7 @@ slider.addEventListener('input', () => {
 // Add event listener to start the metronome (using both click and touch events)
 toggleButton.addEventListener('click', () => {
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
-    
+
     if (isPlaying) {
         stopMetronome();
     } else {
@@ -95,9 +95,10 @@ toggleButton.addEventListener('click', () => {
     }
 });
 
+// Mobile (touch) event listener
 toggleButton.addEventListener('touchstart', () => {
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
-    
+
     if (isPlaying) {
         stopMetronome();
     } else {
@@ -105,9 +106,8 @@ toggleButton.addEventListener('touchstart', () => {
     }
 });
 
-// Make sure the metronome works smoothly on mobile by handling slider interactions
+// Handle slider input in real-time
 slider.addEventListener('input', () => {
-    // Only update the BPM without restarting the metronome
     bpm = slider.value;
     bpmDisplay.textContent = `BPM: ${bpm}`;
     interval = 60000 / bpm;  // Update the interval immediately based on the new BPM
