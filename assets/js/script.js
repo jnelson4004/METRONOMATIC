@@ -14,45 +14,29 @@ const toggleButton = document.getElementById('toggleButton');
 // Function to ensure AudioContext is created or resumed after user interaction
 function initAudioContext() {
     if (!audioContext) {
-        // Create and resume AudioContext after user click (fix for autoplay restrictions)
+        // Create AudioContext only on first user interaction (click or touch)
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Load the sound buffer
+        // Load the sound buffer only once
         fetch('assets/songs/metronome tone 1.mp3')
             .then(response => response.arrayBuffer())
             .then(data => audioContext.decodeAudioData(data))
             .then(buffer => {
                 tickAudio = buffer;
+                console.log("Audio loaded successfully.");
             })
             .catch(error => console.error('Error loading audio file:', error));
-        
-        // If the AudioContext was suspended, resume it
-        if (audioContext.state === 'suspended') {
-            audioContext.resume().then(() => {
-                console.log('AudioContext resumed!');
-            });
-        }
+    }
+
+    // Resume the AudioContext if it's suspended (needed on mobile)
+    if (audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            console.log('AudioContext resumed');
+        });
     }
 }
 
-// Ensure the AudioContext is initialized and audio is ready when user interacts
-toggleButton.addEventListener('click', () => {
-    initAudioContext();  // Initialize or resume the audio context
-
-    // Toggle play/pause based on whether the metronome is already playing
-    if (isPlaying) {
-        stopMetronome();
-    } else {
-        startMetronome();
-    }
-});
-
-// Mobile-specific: Add touchstart event for initialization
-toggleButton.addEventListener('touchstart', () => {
-    initAudioContext();  // Initialize or resume the audio context
-});
-
-// Function to play a tick sound
+// Function to play a tick sound (now works with Web Audio API)
 function playTick() {
     if (!tickAudio) return; // If the audio isn't loaded yet, do nothing
     const source = audioContext.createBufferSource();
@@ -98,4 +82,23 @@ slider.addEventListener('input', () => {
     bpm = slider.value;
     bpmDisplay.textContent = `BPM: ${bpm}`;
     interval = 60000 / bpm;  // Update interval based on the new BPM
+});
+
+// Add event listener to start the metronome (using both click and touch events)
+toggleButton.addEventListener('click', () => {
+    initAudioContext();  // Ensure the AudioContext is initialized or resumed
+    if (isPlaying) {
+        stopMetronome();
+    } else {
+        startMetronome();
+    }
+});
+
+toggleButton.addEventListener('touchstart', () => {
+    initAudioContext();  // Ensure the AudioContext is initialized or resumed
+    if (isPlaying) {
+        stopMetronome();
+    } else {
+        startMetronome();
+    }
 });
