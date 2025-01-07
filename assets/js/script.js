@@ -17,7 +17,7 @@ function initAudioContext() {
         // Create AudioContext only on first user interaction (click or touch)
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Resume the AudioContext if it is suspended (required for mobile Safari)
+        // Force the AudioContext to resume if it's suspended (mobile Safari issue)
         try {
             if (audioContext.state === 'suspended') {
                 audioContext.resume().then(() => {
