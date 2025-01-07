@@ -3,20 +3,18 @@ let isPlaying = false;
 let lastTickTime = 0;
 let tickRequestId = null;  // Store the requestAnimationFrame ID
 let interval = 60000 / bpm; // Initial interval
-
-const tickAudio = new Audio('assets/songs/metronome tone 1.mp3'); // Preload the audio
+let tickAudio = new Audio('assets/songs/metronome tone 1.mp3'); // Preload the audio
 
 // DOM Elements
 const bpmDisplay = document.getElementById('bpmDisplay');
 const slider = document.getElementById('slider');
 const toggleButton = document.getElementById('toggleButton');
 
-// Function to update BPM display when slider is changed
+// Function to update BPM display and tempo while slider is being dragged
 slider.addEventListener('input', () => {
     bpm = slider.value;
     bpmDisplay.textContent = `BPM: ${bpm}`;
     interval = 60000 / bpm;  // Update interval based on the new BPM
-    lastTickTime = performance.now();  // Reset lastTickTime so it adjusts without delay
 });
 
 // Function to play a tick sound
@@ -29,6 +27,7 @@ function playTick() {
 function startMetronome() {
     function tick() {
         const currentTime = performance.now();
+        // Only play the sound if the correct interval has passed
         if (currentTime - lastTickTime >= interval) {
             playTick();
             lastTickTime = currentTime;
@@ -37,7 +36,7 @@ function startMetronome() {
             tickRequestId = requestAnimationFrame(tick);  // Continue the loop
         }
     }
-    lastTickTime = performance.now(); // Reset the start time
+    lastTickTime = performance.now(); // Reset the start time to align with the first tick
     tickRequestId = requestAnimationFrame(tick);  // Start the animation frame loop
     toggleButton.textContent = 'Stop';
     isPlaying = true;
@@ -61,3 +60,4 @@ toggleButton.addEventListener('click', () => {
         startMetronome();
     }
 });
+
