@@ -90,10 +90,11 @@ slider.addEventListener('input', () => {
     interval = 60000 / bpm;  // Update interval based on the new BPM
 });
 
-// **Use the click event only for both desktop and mobile**
+// Handle first touch or click to resume AudioContext (necessary for mobile Safari)
 toggleButton.addEventListener('click', () => {
     initAudioContext();  // Ensure the AudioContext is initialized or resumed
 
+    // If not already playing, start the metronome
     if (isPlaying) {
         stopMetronome();
     } else {
@@ -108,3 +109,12 @@ slider.addEventListener('input', () => {
     interval = 60000 / bpm;  // Update the interval immediately based on the new BPM
     lastTickTime = performance.now();  // Reset lastTickTime so it adjusts smoothly without delay
 });
+
+// Ensure that AudioContext is resumed even after page load for Safari (by listening to touch/click)
+document.body.addEventListener('touchstart', () => {
+    initAudioContext();
+}, { once: true });
+
+document.body.addEventListener('click', () => {
+    initAudioContext();
+}, { once: true });
