@@ -6,6 +6,10 @@ let interval = 60000 / bpm; // Initial interval
 let tickAudio; // Audio buffer (for Web Audio API)
 let audioContext; // Web Audio context
 
+// Tap tempo variables
+let tapTimes = [];  // To store the timestamps of the taps
+const maxTaps = 4;  // Maximum number of taps to calculate the average BPM
+
 // DOM Elements
 const bpmDisplay = document.getElementById('bpmDisplay');
 const slider = document.getElementById('slider');
@@ -117,3 +121,43 @@ document.body.addEventListener('click', () => {
     console.log("First click detected, initializing AudioContext.");
     initAudioContext();
 }, { once: true });
+
+// Tap tempo function
+function handleTap() {
+    const now = performance.now();
+    tapTimes.push(now);
+
+    // If we have more than 4 taps, remove the oldest
+    if (tapTimes.length > maxTaps) {
+        tapTimes.shift();
+    }
+
+    if (tapTimes.length === maxTaps) {
+        // Calculate the tempo based on the average interval between taps
+        const intervals = [];
+        for (let i = 1; i < tapTimes.length; i++) {
+            intervals.push(tapTimes[i] - tapTimes[i - 1]);
+        }
+
+        // Calculate the average interval
+        const averageInterval = intervals.reduce((acc, interval) => acc + interval, 0) / intervals.length;
+
+        // Convert interval to BPM (60,000 milliseconds per minute)
+        bpm = Math.round(60000 / averageInterval);
+        bpmDisplay.textContent = `BPM: ${bpm}`;
+        interval = 60000 / bpm;  // Update the interval for the metronome
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {  // Spacebar
+        event.preventDefault();  // Prevent default spacebar action (scrolling)
+        handleTap();  // Handle tap on spacebar press
+        
+    }
+});
+
+// Add the event listener for the Tap Tempo button
+document.getElementById('tapTempoButton').addEventListener('click', () => {
+    handleTap();  // Trigger tap tempo on button click
+});
